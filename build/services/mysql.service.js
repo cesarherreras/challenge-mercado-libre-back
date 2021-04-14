@@ -59,7 +59,6 @@ var MysqlService = /** @class */ (function () {
                 }
                 else {
                     resolve(connection);
-                    console.log('Conexion correcta.');
                 }
             });
         });
@@ -67,13 +66,14 @@ var MysqlService = /** @class */ (function () {
     MysqlService.saveNewsInDb = function (newA) {
         var _this = this;
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-            var connection, query;
+            var connection, dataToDb, query;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.getConnection()];
                     case 1:
                         connection = _a.sent();
-                        query = "INSERT INTO news (title, url, image) VALUES ('" + newA.title + "', '" + newA.url + "', '" + newA.image + "')";
+                        dataToDb = Buffer.from(JSON.stringify(newA), 'utf-8').toString('base64');
+                        query = "INSERT INTO cache_news (cache) VALUES ('" + dataToDb + "')";
                         connection.query(query, function (error, result) {
                             if (error) {
                                 reject(error);
@@ -87,22 +87,24 @@ var MysqlService = /** @class */ (function () {
             });
         }); });
     };
-    MysqlService.getNews = function () {
+    MysqlService.getCache = function () {
         var _this = this;
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
             var connection, query;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.getConnection()];
                     case 1:
                         connection = _a.sent();
-                        query = 'SELECT * FROM news';
+                        query = 'SELECT * FROM cache_news';
                         return [4 /*yield*/, connection.query(query, function (error, result) {
                                 if (error) {
                                     reject(error);
                                 }
                                 else {
-                                    resolve(result);
+                                    var resultValidated = _this.validateResponse(result);
+                                    resolve(resultValidated);
                                 }
                             })];
                     case 2:
@@ -111,6 +113,39 @@ var MysqlService = /** @class */ (function () {
                 }
             });
         }); });
+    };
+    MysqlService.deleteCache = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+            var connection, query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getConnection()];
+                    case 1:
+                        connection = _a.sent();
+                        query = 'DELETE FROM cache_news';
+                        connection.query(query, function (error, result) {
+                            if (error) {
+                                reject(error);
+                            }
+                            else {
+                                resolve(result);
+                            }
+                        });
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+    };
+    MysqlService.validateResponse = function (result) {
+        if (result.length !== 0) {
+            var dataDecodedBlob = Buffer.from(result[0].cache, 'base64').toString('utf-8');
+            var news = JSON.parse(Buffer.from(dataDecodedBlob, 'base64').toString('utf-8'));
+            return { news: news, saveTime: result[0].timestamp };
+        }
+        else {
+            return undefined;
+        }
     };
     return MysqlService;
 }());

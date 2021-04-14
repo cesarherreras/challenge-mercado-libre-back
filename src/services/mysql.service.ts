@@ -5,8 +5,7 @@ import { NewsModel } from '../models/news.model';
 export class MysqlService {
     constructor() { }
 
-    public static getConnection(): any {
-
+    private static getConnection(): any {
         return new Promise((resolve, reject) => {
             let connection = mysql.createConnection({
                 host: 'localhost',
@@ -20,17 +19,16 @@ export class MysqlService {
                     reject(error);
                 } else {
                     resolve(connection);
-                    console.log('Conexion correcta.');
                 }
             });
         });
     }
 
-    public static saveNewsInDb(newA: NewsModel) {
-
+    public static saveNewsInDb(newA: NewsModel[]) {
         return new Promise(async (resolve, reject) => {
             let connection = await this.getConnection();
-            const query = `INSERT INTO news (title, url, image) VALUES ('${newA.title}', '${newA.url}', '${newA.image}')`;
+            const dataToDb = Buffer.from(JSON.stringify(newA), 'utf-8').toString('base64');
+            const query = `INSERT INTO cache_news (cache) VALUES ('${dataToDb}')`;
             connection.query(query, (error: any, result: any) => {
                 if (error) {
                     reject(error);
@@ -41,11 +39,26 @@ export class MysqlService {
         });
     }
 
-    public static getNews(): Promise<any> {
+    public static getCache(): Promise<{news: [], saveTime: Date}> {
         return new Promise(async (resolve, reject) => {
             let connection = await this.getConnection();
-            const query = 'SELECT * FROM news';
+            const query = 'SELECT * FROM cache_news';
             await connection.query(query, (error: any, result: any) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    const resultValidated = this.validateResponse(result);
+                    resolve(resultValidated);
+                }
+            });
+        });
+    }
+
+    public static deleteCache(){
+        return new Promise(async (resolve, reject) => {
+            let connection = await this.getConnection();
+            const query = 'DELETE FROM cache_news';
+            connection.query(query, (error: any, result: any) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -53,7 +66,16 @@ export class MysqlService {
                 }
             });
         });
+    }
 
+    private static validateResponse(result: any): any{
+        if(result.length !== 0){
+            const dataDecodedBlob = Buffer.from(result[0].cache, 'base64').toString('utf-8');
+            const news = JSON.parse(Buffer.from(dataDecodedBlob, 'base64').toString('utf-8'));
+            return {news, saveTime: result[0].timestamp};
+        }else{
+            return undefined;
+        }
     }
 }
 

@@ -48,32 +48,33 @@ var NewsService = /** @class */ (function () {
     NewsService.getNews = function () {
         var _this = this;
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-            var infoNewsFromDb;
+            var infoNewsFromDb, minutesBetweenDates;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, mysql_service_1.MysqlService.getNews()];
+                    case 0: return [4 /*yield*/, mysql_service_1.MysqlService.getCache()];
                     case 1:
                         infoNewsFromDb = _a.sent();
-                        if (infoNewsFromDb.length !== 0) {
+                        minutesBetweenDates = infoNewsFromDb ? this.getMinutesBetweenDates(new Date().getTime(), new Date(infoNewsFromDb.saveTime).getTime()) : this.MINUTES_NOT_ALLOWED;
+                        console.log('Minutes:', minutesBetweenDates);
+                        if (minutesBetweenDates < this.MINUTES_NOT_ALLOWED) {
                             console.log('Devuelve la cache');
-                            resolve(infoNewsFromDb);
+                            resolve(infoNewsFromDb.news);
                         }
                         else {
                             console.log('Llama el servicio');
-                            node_fetch_1.default('https://test.spaceflightnewsapi.net/api/v2/articles?_limit=40')
-                                .then(function (response) { return response.json(); })
-                                .then(function (data) {
-                                var newsList = data.map(function (item) {
-                                    var newsData = {
-                                        title: item.title,
-                                        url: item.url,
-                                        image: item.imageUrl
-                                    };
-                                    mysql_service_1.MysqlService.saveNewsInDb(newsData);
-                                    return newsData;
+                            this.getDataFromApi().then(function (newsList) { return __awaiter(_this, void 0, void 0, function () {
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, mysql_service_1.MysqlService.deleteCache()];
+                                        case 1:
+                                            _a.sent();
+                                            mysql_service_1.MysqlService.saveNewsInDb(newsList);
+                                            resolve(newsList);
+                                            return [2 /*return*/];
+                                    }
                                 });
-                                resolve(newsList);
-                            }).catch(function () {
+                            }); }).catch(function () {
                                 reject({ statusCode: 500, message: 'Error obteniendo noticias' });
                             });
                         }
@@ -82,6 +83,27 @@ var NewsService = /** @class */ (function () {
             });
         }); });
     };
+    NewsService.getMinutesBetweenDates = function (firstMinutes, secondMinutes) {
+        return Math.floor(((firstMinutes - secondMinutes) / 60000));
+    };
+    NewsService.getDataFromApi = function () {
+        return new Promise(function (resolve) {
+            node_fetch_1.default('https://test.spaceflightnewsapi.net/api/v2/articles?_limit=40') //COLOCAR EN VARIABLES DE ENTORNO
+                .then(function (response) { return response.json(); })
+                .then(function (data) {
+                var newsList = data.map(function (item) {
+                    var newsData = {
+                        title: item.title,
+                        url: item.url,
+                        image: item.imageUrl
+                    };
+                    return newsData;
+                });
+                resolve(newsList);
+            });
+        });
+    };
+    NewsService.MINUTES_NOT_ALLOWED = 5;
     return NewsService;
 }());
 exports.NewsService = NewsService;
