@@ -14,7 +14,6 @@ app.use(function (_, res, next) {
     next();
 });
 app.use('/', NewsController_1.default);
-app.listen(3000, function () {
-    console.log('puerto 3000');
-});
+app.listen(3000, function () { });
+exports.default = app;
 //# sourceMappingURL=app.js.map

@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { NewsModel } from '../models/news.model';
-import { MysqlService } from "../services/mysql.service";
+import { MysqlService } from '../services/mysql.service';
 
 export class NewsService {
 
@@ -25,16 +25,16 @@ export class NewsService {
                     reject({ statusCode: 500, message: 'Error obteniendo noticias' });
                 });
             }
-        })
+        });
     }
 
     public static getMinutesBetweenDates(firstMinutes: number, secondMinutes: number): number{
-        return Math.floor(((firstMinutes - secondMinutes) / 60000))
+        return Math.floor(((firstMinutes - secondMinutes) / 60000));
     }
 
     public static getDataFromApi(): Promise<NewsModel[]>{
         return new Promise((resolve) => {
-            fetch('https://test.spaceflightnewsapi.net/api/v2/articles?_limit=40') //COLOCAR EN VARIABLES DE ENTORNO
+            fetch('https://test.spaceflightnewsapi.net/api/v2/articles?_limit=40')
             .then(response => response.json())
             .then(data => {
                 const newsList = data.map((item: any) => {
@@ -42,11 +42,11 @@ export class NewsService {
                         title: item.title,
                         url: item.url,
                         image: item.imageUrl
-                    }
+                    };
                     return newsData;
                 });
                 resolve(newsList);
             });
-        })
+        });
     }
 }

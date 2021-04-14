@@ -88,7 +88,7 @@ var NewsService = /** @class */ (function () {
     };
     NewsService.getDataFromApi = function () {
         return new Promise(function (resolve) {
-            node_fetch_1.default('https://test.spaceflightnewsapi.net/api/v2/articles?_limit=40') //COLOCAR EN VARIABLES DE ENTORNO
+            node_fetch_1.default('https://test.spaceflightnewsapi.net/api/v2/articles?_limit=40')
                 .then(function (response) { return response.json(); })
                 .then(function (data) {
                 var newsList = data.map(function (item) {
