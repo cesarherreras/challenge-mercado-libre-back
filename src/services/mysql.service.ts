@@ -1,5 +1,5 @@
 import mysql from 'mysql';
-import { NewsModel } from '../models/news.model';
+import { NewsModel, ResponseModel } from '../models/news.model';
 
 
 export class MysqlService {
@@ -40,7 +40,7 @@ export class MysqlService {
         });
     }
 
-    public static getCache(): Promise<{news: [], saveTime: Date}> {
+    public static getCache(): Promise<ResponseModel | undefined> {
         return new Promise(async (resolve, reject) => {
             const connection = await this.getConnection();
             const query = 'SELECT * FROM cache_news';
@@ -69,7 +69,7 @@ export class MysqlService {
         });
     }
 
-    private static validateResponse(result: any): any{
+    private static validateResponse(result: any): ResponseModel | undefined{
         if(result.length !== 0){
             const dataDecodedBlob = Buffer.from(result[0].cache, 'base64').toString('utf-8');
             const news = JSON.parse(Buffer.from(dataDecodedBlob, 'base64').toString('utf-8'));

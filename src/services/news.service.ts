@@ -7,14 +7,14 @@ export class NewsService {
     public static MINUTES_NOT_ALLOWED = 5;
     constructor() { }
 
-    public static getNews(): Promise<NewsModel[]> {
+    public static getNews(): Promise<NewsModel[] | undefined> {
         return new Promise(async (resolve, reject) => {
             const infoNewsFromDb = await MysqlService.getCache();
             const minutesBetweenDates = infoNewsFromDb ? this.getMinutesBetweenDates(new Date().getTime(), new Date(infoNewsFromDb.saveTime).getTime()) : this.MINUTES_NOT_ALLOWED;
             console.log('Minutes:', minutesBetweenDates);
             if (minutesBetweenDates < this.MINUTES_NOT_ALLOWED) {
                 console.log('Devuelve la cache');
-                resolve(infoNewsFromDb.news);
+                resolve(infoNewsFromDb?.news);
             } else {
                 console.log('Llama el servicio');
                 this.getDataFromApi().then(async (newsList) => {

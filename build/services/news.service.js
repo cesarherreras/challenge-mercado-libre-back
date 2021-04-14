@@ -59,7 +59,7 @@ var NewsService = /** @class */ (function () {
                         console.log('Minutes:', minutesBetweenDates);
                         if (minutesBetweenDates < this.MINUTES_NOT_ALLOWED) {
                             console.log('Devuelve la cache');
-                            resolve(infoNewsFromDb.news);
+                            resolve(infoNewsFromDb === null || infoNewsFromDb === void 0 ? void 0 : infoNewsFromDb.news);
                         }
                         else {
                             console.log('Llama el servicio');

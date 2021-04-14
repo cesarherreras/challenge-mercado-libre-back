@@ -3,3 +3,8 @@ export interface NewsModel{
     url: string;
     image: string;
 }
+
+export interface ResponseModel {
+    news: [], 
+    saveTime: Date
+}

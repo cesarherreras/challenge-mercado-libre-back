@@ -49,7 +49,7 @@ var MysqlService = /** @class */ (function () {
             var connection = mysql_1.default.createConnection({
                 host: 'localhost',
                 user: 'root',
-                password: '',
+                password: '63481600',
                 database: 'news_db',
                 port: 3306
             });

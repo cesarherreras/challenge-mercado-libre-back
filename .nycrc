@@ -12,13 +12,12 @@
     "test/**/*.spec.ts"
   ],
   "exclude": [
-    "src/**/*.spec.*"
   ],
   "require": [
     "ts-node/register"
   ],
   "sourceMap": true,
   "instrument": true,
-  "check-coverage": false,
+  "check-coverage": true,
   "cache": true
 }
